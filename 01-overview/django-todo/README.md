@@ -13,14 +13,14 @@ A simple Todo web application built with Django and Bootstrap 5.
 - Subtle glass header, action icons on hover, and consistent favicon
 
 ## Screenshots
-<a href="doc/imgs/task-list.png" target="_blank">
-  <img src="doc/imgs/task-list.png" alt="Task List" width="200"/>
+<a href="doc/imgs/Django-TODO_img1.png" target="_blank">
+  <img src="doc/imgs/Django-TODO_img1.png" alt="Django-TODO_img1" width="200"/>
 </a>
-<a href="doc/imgs/task-details.png" target="_blank">
-  <img src="doc/imgs/task-details.png" alt="Task Details" width="200"/>
+<a href="doc/imgs/Django-TODO_img2.png" target="_blank">
+  <img src="doc/imgs/Django-TODO_img2.png" alt="Django-TODO_img2" width="200"/>
 </a>
-<a href="doc/imgs/statistics.png" target="_blank">
-  <img src="doc/imgs/statistics.png" alt="Statistics" width="200"/>
+<a href="doc/imgs/Django-TODO_img3.png" target="_blank">
+  <img src="doc/imgs/Django-TODO_img3.png" alt="Django-TODO_img3" width="200"/>
 </a>
 
 ## Tech Stack
