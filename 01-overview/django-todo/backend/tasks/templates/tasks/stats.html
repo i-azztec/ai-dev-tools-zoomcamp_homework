@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1 class="display-6 fw-bold mb-4">Statistics</h1>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-muted small">Total tasks</span>
+            <i class="bi bi-list-task text-primary"></i>
+          </div>
+          <div class="display-6 fw-bold text-primary">{{ stats.total }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-muted small">Active</span>
+            <i class="bi bi-circle text-info"></i>
+          </div>
+          <div class="display-6 fw-bold text-info">{{ stats.active }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-muted small">Completed</span>
+            <i class="bi bi-check-circle text-success"></i>
+          </div>
+          <div class="display-6 fw-bold text-success">{{ stats.done }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-muted small">Overdue</span>
+            <i class="bi bi-clock text-danger"></i>
+          </div>
+          <div class="display-6 fw-bold text-danger">{{ stats.overdue }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="h6 mb-0">Completion progress</h2>
+    </div>
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="small">Completed {{ stats.done }} of {{ stats.total }} tasks</span>
+        <span class="small text-primary">{{ stats.progress }}%</span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuenow="{{ stats.progress }}" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" style="width: {{ stats.progress }}%"></div>
+      </div>
+      <div class="row g-3 pt-3 border-top mt-3">
+        <div class="col-12 col-md-4">
+          <p class="text-muted small mb-1">Percent complete</p>
+          <p class="h4 fw-bold text-primary mb-0">{{ stats.progress }}%</p>
+        </div>
+        <div class="col-12 col-md-4">
+          <p class="text-muted small mb-1">Remaining tasks</p>
+          <p class="h4 fw-bold text-info mb-0">{{ stats.active }}</p>
+        </div>
+        <div class="col-12 col-md-4">
+          <p class="text-muted small mb-1">Require attention</p>
+          <p class="h4 fw-bold text-danger mb-0">{{ stats.overdue }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
