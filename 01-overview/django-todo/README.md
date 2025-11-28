@@ -12,6 +12,17 @@ A simple Todo web application built with Django and Bootstrap 5.
 - Statistics dashboard
 - Subtle glass header, action icons on hover, and consistent favicon
 
+## Screenshots
+<a href="doc/imgs/task-list.png" target="_blank">
+  <img src="doc/imgs/task-list.png" alt="Task List" width="200"/>
+</a>
+<a href="doc/imgs/task-details.png" target="_blank">
+  <img src="doc/imgs/task-details.png" alt="Task Details" width="200"/>
+</a>
+<a href="doc/imgs/statistics.png" target="_blank">
+  <img src="doc/imgs/statistics.png" alt="Statistics" width="200"/>
+</a>
+
 ## Tech Stack
 
 - Django
@@ -88,5 +99,5 @@ uv run python manage.py seed_todos --force
 
 ## Acknowledgements
 
-Thanks to the open-source learning framework from DataTalks.Club: 
+Thanks to DataTalks.Club for open-source learning framework: 
 * https://github.com/DataTalksClub/ai-dev-tools-zoomcamp
