@@ -1,0 +1,115 @@
+import { useState, useEffect } from 'react';
+import { getRoom, updateRoomCode, updateRoomTask, executeCode, getRoomParticipants } from '@/api/apiClient';
+import type { Room, CodeExecutionResult, Participant } from '@/api/apiClient';
+
+export function useRoom(roomId: string) {
+  const [room, setRoom] = useState<Room | null>(null);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadRoom();
+    loadParticipants();
+  }, [roomId]);
+
+  const loadRoom = async () => {
+    try {
+      setLoading(true);
+      const data = await getRoom(roomId);
+      if (data) {
+        setRoom(data);
+        setError(null);
+      } else {
+        setError('Комната не найдена');
+      }
+    } catch (err) {
+      setError('Ошибка загрузки комнаты');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadParticipants = async () => {
+    try {
+      const data = await getRoomParticipants(roomId);
+      setParticipants(data);
+    } catch (err) {
+      console.error('Ошибка загрузки участников:', err);
+    }
+  };
+
+  const updateCode = async (code: string) => {
+    if (!room) return;
+    
+    // Оптимистичное обновление
+    setRoom({ ...room, code });
+    
+    try {
+      await updateRoomCode(roomId, code);
+    } catch (err) {
+      console.error('Ошибка обновления кода:', err);
+    }
+  };
+
+  const updateTask = async (task: string) => {
+    if (!room) return;
+    
+    // Оптимистичное обновление
+    setRoom({ ...room, task });
+    
+    try {
+      await updateRoomTask(roomId, task);
+    } catch (err) {
+      console.error('Ошибка обновления задачи:', err);
+    }
+  };
+
+  const updateLanguage = (language: 'javascript' | 'python') => {
+    if (!room) return;
+    
+    // При смене языка добавляем шаблон кода, если редактор пуст или содержит стандартный текст
+    let newCode = room.code;
+    const isEmptyOrDefault = !room.code.trim() || room.code.trim() === '// Напишите код здесь';
+    
+    if (isEmptyOrDefault) {
+      newCode = language === 'javascript' 
+        ? '// Напишите код здесь\nfunction solution() {\n  // ваше решение\n}\n'
+        : '# Напишите код здесь\ndef solution():\n    pass\n';
+    }
+    
+    setRoom({ ...room, language, code: newCode });
+  };
+
+  const runCode = async (): Promise<CodeExecutionResult> => {
+    if (!room) {
+      return {
+        output: '',
+        error: 'Комната не загружена',
+        executionTime: 0
+      };
+    }
+    
+    try {
+      return await executeCode(room.code, room.language);
+    } catch (err) {
+      return {
+        output: '',
+        error: 'Ошибка выполнения кода',
+        executionTime: 0
+      };
+    }
+  };
+
+  return {
+    room,
+    participants,
+    loading,
+    error,
+    updateCode,
+    updateTask,
+    updateLanguage,
+    runCode
+  };
+}
