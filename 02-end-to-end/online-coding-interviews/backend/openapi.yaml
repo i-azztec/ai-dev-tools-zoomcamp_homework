@@ -1,25 +1,25 @@
 openapi: 3.0.3
 info:
   title: CodeInterview API
-  description: API для платформы онлайн-собеседований по программированию
+  description: API for the online coding interview platform
   version: 1.0.0
 servers:
   - url: http://localhost:3001/api
 paths:
   /rooms:
     post:
-      summary: Создать новую комнату
+      summary: Create a new room
       operationId: createRoom
       responses:
         '201':
-          description: Комната создана
+          description: Room created
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Room'
   /rooms/{roomId}:
     get:
-      summary: Получить комнату по ID
+      summary: Get room by ID
       operationId: getRoom
       parameters:
         - name: roomId
@@ -29,16 +29,16 @@ paths:
             type: string
       responses:
         '200':
-          description: Данные комнаты
+          description: Room data
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Room'
         '404':
-          description: Комната не найдена
+          description: Room not found
   /rooms/{roomId}/code:
     put:
-      summary: Обновить код в комнате
+      summary: Update room code
       operationId: updateRoomCode
       parameters:
         - name: roomId
@@ -54,16 +54,16 @@ paths:
               $ref: '#/components/schemas/UpdateCodeRequest'
       responses:
         '200':
-          description: Код обновлён
+          description: Code updated
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Room'
         '404':
-          description: Комната не найдена
+          description: Room not found
   /rooms/{roomId}/task:
     put:
-      summary: Обновить задачу в комнате
+      summary: Update room task
       operationId: updateRoomTask
       parameters:
         - name: roomId
@@ -79,16 +79,16 @@ paths:
               $ref: '#/components/schemas/UpdateTaskRequest'
       responses:
         '200':
-          description: Задача обновлена
+          description: Task updated
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Room'
         '404':
-          description: Комната не найдена
+          description: Room not found
   /rooms/{roomId}/language:
     put:
-      summary: Обновить язык программирования
+      summary: Update programming language
       operationId: updateRoomLanguage
       parameters:
         - name: roomId
@@ -104,16 +104,16 @@ paths:
               $ref: '#/components/schemas/UpdateLanguageRequest'
       responses:
         '200':
-          description: Язык обновлён
+          description: Language updated
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Room'
         '404':
-          description: Комната не найдена
+          description: Room not found
   /rooms/{roomId}/participants:
     get:
-      summary: Получить список участников комнаты
+      summary: Get room participants
       operationId: getRoomParticipants
       parameters:
         - name: roomId
@@ -123,7 +123,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Список участников
+          description: Participants list
           content:
             application/json:
               schema:
@@ -131,10 +131,10 @@ paths:
                 items:
                   $ref: '#/components/schemas/Participant'
         '404':
-          description: Комната не найдена
+          description: Room not found
   /rooms/{roomId}/execute:
     post:
-      summary: Выполнить код
+      summary: Execute code
       operationId: executeCode
       parameters:
         - name: roomId
@@ -150,7 +150,7 @@ paths:
               $ref: '#/components/schemas/ExecuteCodeRequest'
       responses:
         '200':
-          description: Результат выполнения
+          description: Execution result
           content:
             application/json:
               schema:
@@ -221,4 +221,3 @@ components:
         language:
           type: string
           enum: [javascript, python]
-

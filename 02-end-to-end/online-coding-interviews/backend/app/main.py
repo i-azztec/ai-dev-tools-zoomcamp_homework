@@ -1,13 +1,13 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from .api.routes import router as api_router
-from .services.room_service import update_code, update_task, add_participant, remove_participant, get_participants
+from .services.room_service import update_code, update_task, add_participant, remove_participant, get_participants, update_language
 import json
 from datetime import datetime, timezone
 
 app = FastAPI(
     title="CodeInterview API",
-    description="API для платформы онлайн-собеседований",
+    description="API for the online technical interview platform",
     version="1.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
@@ -80,7 +80,7 @@ async def room_ws(websocket: WebSocket, room_id: str):
                         except Exception:
                             pass
             elif t == "join":
-                name = data.get("name") or "Гость"
+                name = data.get("name") or "Guest"
                 p = add_participant(room_id, name)
                 ws_participant_map[websocket] = (room_id, p["id"], p["name"]) 
                 plist = get_participants(room_id)
@@ -93,10 +93,17 @@ async def room_ws(websocket: WebSocket, room_id: str):
                     await websocket.send_text(json.dumps({"type": "me", "id": p["id"], "name": p["name"]}))
                 except Exception:
                     pass
+                # system join message
+                join_payload = json.dumps({"type": "chat", "userName": p["name"], "text": "joined", "timestamp": _now()})
+                for ws in list(rooms_ws.get(room_id, set())):
+                    try:
+                        await ws.send_text(join_payload)
+                    except Exception:
+                        pass
             elif t == "chat_message":
                 text = data.get("text", "")
                 rid_pid_name = ws_participant_map.get(websocket)
-                userName = (rid_pid_name[2] if rid_pid_name else data.get("userName", "Гость"))
+                userName = (rid_pid_name[2] if rid_pid_name else data.get("userName", "Guest"))
                 payload = json.dumps({"type": "chat", "userName": userName, "text": text, "timestamp": _now()})
                 for ws in list(rooms_ws.get(room_id, set())):
                     try:
@@ -114,6 +121,16 @@ async def room_ws(websocket: WebSocket, room_id: str):
                             await ws.send_text(payload)
                         except Exception:
                             pass
+            elif t == "language_update":
+                lang = data.get("language")
+                if lang in ("javascript", "python"):
+                    update_language(room_id, lang)
+                    for ws in list(rooms_ws.get(room_id, set())):
+                        if ws is not websocket:
+                            try:
+                                await ws.send_text(json.dumps({"type": "language", "language": lang}))
+                            except Exception:
+                                pass
     except WebSocketDisconnect:
         rooms_ws[room_id].discard(websocket)
         rid_pid_name = ws_participant_map.pop(websocket, None)

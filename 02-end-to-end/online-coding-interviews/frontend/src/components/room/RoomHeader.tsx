@@ -42,7 +42,7 @@ export default function RoomHeader({ roomId, participants }: RoomHeaderProps) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (e) {
-        console.error('Ошибка копирования ссылки:', e);
+        console.error('Copy link error:', e);
       }
     }
   };
@@ -58,7 +58,7 @@ export default function RoomHeader({ roomId, participants }: RoomHeaderProps) {
           
           <div className="flex items-center gap-4 text-sm">
             <span className="text-muted-foreground">
-              Комната: <span className="text-foreground font-mono">{roomId}</span>
+              Room: <span className="text-foreground font-mono">{roomId}</span>
             </span>
             
             <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -89,12 +89,12 @@ export default function RoomHeader({ roomId, participants }: RoomHeaderProps) {
             {copied ? (
               <>
                 <Check className="w-4 h-4" />
-                Скопировано
+                Copied
               </>
             ) : (
               <>
                 <Copy className="w-4 h-4" />
-                Копировать ссылку
+                Copy link
               </>
             )}
           </Button>

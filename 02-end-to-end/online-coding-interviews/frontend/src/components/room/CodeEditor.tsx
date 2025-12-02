@@ -31,7 +31,7 @@ export default function CodeEditor({ code, language, onChange }: CodeEditorProps
   if (!mounted) {
     return (
       <div className="h-full bg-[hsl(var(--editor-background))] flex items-center justify-center">
-        <div className="text-muted-foreground">Загрузка редактора...</div>
+        <div className="text-muted-foreground">Loading editor...</div>
       </div>
     );
   }

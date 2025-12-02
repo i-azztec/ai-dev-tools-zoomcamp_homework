@@ -20,7 +20,7 @@ export default function HomePage() {
     try {
       setIsCreating(true);
       
-      // Сохраняем имя в localStorage
+      // Save name to localStorage
       if (userName.trim()) {
         localStorage.setItem('userName', userName.trim());
       }
@@ -29,8 +29,8 @@ export default function HomePage() {
       navigate(`/room/${room.id}`);
     } catch (error) {
       toast({
-        title: 'Ошибка',
-        description: 'Не удалось создать комнату',
+        title: 'Error',
+        description: 'Failed to create room',
         variant: 'destructive',
       });
     } finally {
@@ -41,13 +41,13 @@ export default function HomePage() {
   const handleJoinRoom = () => {
     if (!roomCode.trim()) {
       toast({
-        title: 'Введите код комнаты',
+        title: 'Enter room code',
         variant: 'destructive',
       });
       return;
     }
     
-    // Сохраняем имя в localStorage
+    // Save name to localStorage
     if (userName.trim()) {
       localStorage.setItem('userName', userName.trim());
     }
@@ -75,19 +75,19 @@ export default function HomePage() {
             <h1 className="text-4xl font-bold">CodeInterview</h1>
             
             <p className="text-lg text-muted-foreground max-w-sm mx-auto">
-              Платформа для онлайн технических интервью. Создавайте комнаты и проводите собеседования в реальном времени
+              Platform for online technical interviews. Create rooms and collaborate in real time.
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="text-left">
               <label className="text-sm text-muted-foreground mb-2 block">
-                Ваше имя (опционально):
+                Your name (optional):
               </label>
               <Input
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                placeholder="Введите ваше имя"
+                placeholder="Enter your name"
                 className="text-center"
               />
             </div>
@@ -98,7 +98,7 @@ export default function HomePage() {
               onClick={handleCreateRoom}
               disabled={isCreating}
             >
-              🚀 {isCreating ? 'Создание...' : 'Создать комнату'}
+              🚀 {isCreating ? 'Creating...' : 'Create room'}
             </Button>
 
             <div className="relative">
@@ -106,7 +106,7 @@ export default function HomePage() {
                 <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-background text-muted-foreground">или</span>
+                <span className="px-4 bg-background text-muted-foreground">or</span>
               </div>
             </div>
 
@@ -114,7 +114,7 @@ export default function HomePage() {
               <Input
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value)}
-                placeholder="Введите код комнаты"
+                placeholder="Enter room code"
                 className="text-center font-mono"
                 maxLength={6}
                 onKeyDown={(e) => {
@@ -129,7 +129,7 @@ export default function HomePage() {
                 className="w-full"
                 onClick={handleJoinRoom}
               >
-                Войти в комнату
+                Join room
               </Button>
             </div>
           </div>

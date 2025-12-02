@@ -4,6 +4,7 @@ import RoomHeader from '@/components/room/RoomHeader';
 import Toolbar from '@/components/room/Toolbar';
 import CodeEditor from '@/components/room/CodeEditor';
 import RightPanel from '@/components/room/RightPanel';
+import OutputTab from '@/components/room/OutputTab';
 import { useRoom } from '@/hooks/useRoom';
 import type { CodeExecutionResult } from '@/api/apiClient';
 import type { TaskTemplate } from '@/data/taskLibrary';
@@ -32,7 +33,7 @@ export default function RoomPage() {
     }
   }, [room?.language, updateTask, updateCode, updateLanguage]);
 
-  // Инициализация начальной задачи из библиотеки, если пусто
+  // Initialize initial task from library if empty
   useEffect(() => {
     if (!initApplied && room && !room.task?.trim() && !room.taskTitle?.trim()) {
       const initial = taskLibrary.find(t => t.language === room.language);
@@ -48,7 +49,7 @@ export default function RoomPage() {
       <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <div className="text-muted-foreground">Загрузка комнаты...</div>
+          <div className="text-muted-foreground">Loading room...</div>
         </div>
       </div>
     );
@@ -59,15 +60,15 @@ export default function RoomPage() {
       <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="text-6xl">😕</div>
-          <h1 className="text-2xl font-bold">Комната не найдена</h1>
+          <h1 className="text-2xl font-bold">Room not found</h1>
           <p className="text-muted-foreground max-w-md">
-            Возможно, ссылка неверная или срок действия комнаты истёк.
+            The link may be invalid or the room has expired.
           </p>
           <a 
             href="/"
             className="inline-block px-6 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
           >
-            🏠 На главную
+            🏠 Go Home
           </a>
         </div>
       </div>
@@ -86,12 +87,18 @@ export default function RoomPage() {
       />
       
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-[65] overflow-hidden">
+        <div className="flex-[65] overflow-hidden flex flex-col">
           <CodeEditor
             code={room.code}
             language={room.language}
             onChange={updateCode}
           />
+          <div className="border-t border-border bg-card">
+            <div className="p-3 text-sm font-medium text-muted-foreground">📤 Output</div>
+            <div className="h-64 overflow-auto">
+              <OutputTab result={output ?? executionResult} isRunning={isRunning} />
+            </div>
+          </div>
         </div>
         
         <div className="flex-[35] overflow-hidden">
@@ -100,8 +107,6 @@ export default function RoomPage() {
             task={room.task}
             taskTitle={room.taskTitle}
             onTaskChange={updateTask}
-            executionResult={output ?? executionResult}
-            isRunning={isRunning}
             myName={myName}
             onChat={onChat}
             sendChatMessage={sendChatMessage}

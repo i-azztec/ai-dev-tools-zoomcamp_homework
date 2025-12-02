@@ -1,9 +1,9 @@
 // API Client - Mock implementation for backend integration
 
-// Базовый URL API (потом заменим на реальный)
+// Base API URL (replace with real in production)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Типы данных
+// Data types
 export interface Room {
   id: string;
   code: string;
@@ -25,16 +25,16 @@ export interface CodeExecutionResult {
   executionTime: number;
 }
 
-// === API функции ===
+// === API functions ===
 
-// Создать новую комнату
+// Create a new room
 export async function createRoom(): Promise<Room> {
   const res = await fetch(`${API_BASE_URL}/rooms`, { method: 'POST' });
   if (!res.ok) throw new Error('Failed to create room');
   return await res.json();
 }
 
-// Получить комнату по ID
+// Get a room by ID
 export async function getRoom(roomId: string): Promise<Room | null> {
   const res = await fetch(`${API_BASE_URL}/rooms/${roomId}`);
   if (res.status === 404) return null;
@@ -42,7 +42,7 @@ export async function getRoom(roomId: string): Promise<Room | null> {
   return await res.json();
 }
 
-// Обновить код в комнате
+// Update code in a room
 export async function updateRoomCode(roomId: string, code: string): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/code`, {
     method: 'PUT',
@@ -52,7 +52,7 @@ export async function updateRoomCode(roomId: string, code: string): Promise<void
   if (!res.ok) throw new Error('Failed to update code');
 }
 
-// Обновить язык в комнате
+// Update language in a room
 export async function updateRoomLanguage(roomId: string, language: string): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/language`, {
     method: 'PUT',
@@ -62,7 +62,7 @@ export async function updateRoomLanguage(roomId: string, language: string): Prom
   if (!res.ok) throw new Error('Failed to update language');
 }
 
-// Обновить задачу в комнате
+// Update task in a room
 export async function updateRoomTask(roomId: string, task: string): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/task`, {
     method: 'PUT',
@@ -82,7 +82,7 @@ export async function updateRoomTaskWithTitle(roomId: string, title: string | un
   return await res.json();
 }
 
-// Выполнить код
+// Execute code
 export async function executeCode(roomId: string, code: string, language: string): Promise<CodeExecutionResult> {
   const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/execute`, {
     method: 'POST',
@@ -93,14 +93,14 @@ export async function executeCode(roomId: string, code: string, language: string
   return await res.json();
 }
 
-// Получить участников комнаты
+// Get room participants
 export async function getRoomParticipants(roomId: string): Promise<Participant[]> {
   const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/participants`);
   if (!res.ok) throw new Error('Failed to get participants');
   return await res.json();
 }
 
-// Вспомогательные функции
+// Helper functions
 function generateRoomId(): string {
   return Math.random().toString(36).substring(2, 8);
 }

@@ -28,7 +28,7 @@ export default function Header({ showNavigation = true }: HeaderProps) {
               href="#" 
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              О проекте
+              About
             </a>
           </nav>
         )}

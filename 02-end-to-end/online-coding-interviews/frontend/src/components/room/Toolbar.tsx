@@ -22,7 +22,7 @@ export default function Toolbar({ language, onLanguageChange, onRun, isRunning, 
   return (
     <div className="border-b border-border bg-card px-4 py-2 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground">Язык:</span>
+        <span className="text-sm text-muted-foreground">Language:</span>
         <Select value={language} onValueChange={onLanguageChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue />
@@ -47,7 +47,7 @@ export default function Toolbar({ language, onLanguageChange, onRun, isRunning, 
         className="gap-2"
       >
         <Play className="w-4 h-4" />
-        {isRunning ? 'Выполняется...' : 'Запустить'}
+        {isRunning ? 'Running...' : 'Run'}
       </Button>
     </div>
   );

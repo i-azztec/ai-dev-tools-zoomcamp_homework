@@ -10,7 +10,7 @@ export default function OutputTab({ result, isRunning }: OutputTabProps) {
     <div className="p-4 h-full">
       <div className="bg-[hsl(var(--editor-background))] rounded-md p-4 h-full overflow-auto font-mono text-sm">
         {isRunning ? (
-          <div className="text-muted-foreground">Выполнение кода...</div>
+          <div className="text-muted-foreground">Running code...</div>
         ) : result ? (
           <div className="space-y-3">
             {result.error ? (
@@ -21,13 +21,13 @@ export default function OutputTab({ result, isRunning }: OutputTabProps) {
             
             {result.executionTime > 0 && (
               <div className="text-muted-foreground text-xs mt-3 pt-3 border-t border-border">
-                Выполнено за {result.executionTime}ms
+                Completed in {result.executionTime}ms
               </div>
             )}
           </div>
         ) : (
           <div className="text-muted-foreground">
-            Нажмите "Запустить" для выполнения кода
+            Click "Run" to execute code
           </div>
         )}
       </div>

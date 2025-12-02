@@ -10,7 +10,7 @@ export function useRoom(roomId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<RoomWebSocket | null>(null);
-  const [myName, setMyName] = useState<string>(localStorage.getItem('userName') || 'Гость');
+  const [myName, setMyName] = useState<string>(localStorage.getItem('userName') || 'Guest');
   const [output, setOutput] = useState<CodeExecutionResult | null>(null);
 
   const loadRoom = useCallback(async () => {
@@ -25,10 +25,10 @@ export function useRoom(roomId: string) {
         setRoom(data);
         setError(null);
       } else {
-        setError('Комната не найдена');
+        setError('Room not found');
       }
     } catch (err) {
-      setError('Ошибка загрузки комнаты');
+      setError('Failed to load room');
       console.error(err);
     } finally {
       setLoading(false);
@@ -41,7 +41,7 @@ export function useRoom(roomId: string) {
       const data = await getRoomParticipants(roomId);
       setParticipants(data);
     } catch (err) {
-      console.error('Ошибка загрузки участников:', err);
+      console.error('Failed to load participants:', err);
     }
   }, [roomId]);
 
@@ -65,13 +65,15 @@ export function useRoom(roomId: string) {
       wsRef.current.onOutput((res) => {
         setOutput({ output: res.output, error: res.error, executionTime: res.executionTime });
       });
+      wsRef.current.onLanguage((lang) => {
+        setRoom((prev) => prev ? { ...prev, language: lang } : prev);
+      });
       wsRef.current.onMe((me) => {
         setMyName(me.name);
         localStorage.setItem('userName', me.name);
       });
       wsRef.current.connect();
-      const userName = localStorage.getItem('userName') || 'Гость';
-      wsRef.current.join(userName);
+      wsRef.current.join('Guest');
     }
     return () => {
       wsRef.current?.disconnect();
@@ -81,13 +83,13 @@ export function useRoom(roomId: string) {
 
   const updateCode = async (code: string) => {
     if (!room) return;
-    // Оптимистичное обновление (используем функциональный сеттер)
+    // Optimistic update (functional setter)
     setRoom(prev => prev ? { ...prev, code } : prev);
     
     try {
       await updateRoomCode(roomId, code);
     } catch (err) {
-      console.error('Ошибка обновления кода:', err);
+      console.error('Failed to update code:', err);
     }
     wsRef.current?.sendCodeUpdate(code);
   };
@@ -102,7 +104,7 @@ export function useRoom(roomId: string) {
 
   const updateTask = async (task: string, title?: string) => {
     if (!room) return;
-    // Оптимистичное обновление (используем функциональный сеттер)
+    // Optimistic update (functional setter)
     setRoom(prev => prev ? { ...prev, task, taskTitle: typeof title !== 'undefined' ? title : prev.taskTitle } : prev);
     
     try {
@@ -112,32 +114,33 @@ export function useRoom(roomId: string) {
         await updateRoomTask(roomId, task);
       }
     } catch (err) {
-      console.error('Ошибка обновления задачи:', err);
+      console.error('Failed to update task:', err);
     }
     wsRef.current?.sendTaskUpdate(task, title);
   };
 
   const updateLanguage = (language: 'javascript' | 'python') => {
     if (!room) return;
-    // При смене языка добавляем шаблон кода, если редактор пуст или содержит стандартный текст
+    // When changing language, insert code template if editor is empty or contains default text
     setRoom(prev => {
       if (!prev) return prev;
-      const isEmptyOrDefault = !prev.code.trim() || prev.code.trim() === '// Напишите код здесь';
+      const isEmptyOrDefault = !prev.code.trim() || prev.code.trim() === '// Write code here';
       const newCode = isEmptyOrDefault
         ? (language === 'javascript'
-            ? '// Напишите код здесь\nfunction solution() {\n  // ваше решение\n}\n'
-            : '# Напишите код здесь\ndef solution():\n    pass\n')
+            ? '// Write code here\nfunction solution() {\n  // your solution\n}\n'
+            : '# Write code here\ndef solution():\n    pass\n')
         : prev.code;
       return { ...prev, language, code: newCode };
     });
-    updateRoomLanguage(roomId, language).catch(err => console.error('Ошибка обновления языка:', err));
+    updateRoomLanguage(roomId, language).catch(err => console.error('Failed to update language:', err));
+    wsRef.current?.sendLanguageUpdate(language);
   };
 
   const runCode = async (): Promise<CodeExecutionResult> => {
     if (!room) {
       return {
         output: '',
-        error: 'Комната не загружена',
+        error: 'Room is not loaded',
         executionTime: 0
       };
     }
@@ -150,7 +153,7 @@ export function useRoom(roomId: string) {
     } catch (err) {
       return {
         output: '',
-        error: 'Ошибка выполнения кода',
+        error: 'Code execution error',
         executionTime: 0
       };
     }

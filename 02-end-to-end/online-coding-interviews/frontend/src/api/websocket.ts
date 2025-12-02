@@ -1,4 +1,4 @@
-// WebSocket клиент - Mock implementation для real-time функционала
+// WebSocket client - mock implementation for real-time functionality
 
 export interface Participant {
   id: string;
@@ -6,7 +6,7 @@ export interface Participant {
   isOnline: boolean;
 }
 
-// WebSocket заглушка для real-time функционала
+// WebSocket stub for real-time functionality
 export class RoomWebSocket {
   private roomId: string;
   private ws?: WebSocket;
@@ -17,6 +17,7 @@ export class RoomWebSocket {
   private onChatMessage?: (message: { userName: string; text: string; timestamp: string }) => void;
   private onOutputChange?: (result: { output: string; error: string | null; executionTime: number }) => void;
   private onMeChange?: (me: { id: string; name: string }) => void;
+  private onLanguageChange?: (language: 'javascript' | 'python') => void;
 
   constructor(roomId: string) {
     this.roomId = roomId;
@@ -49,6 +50,9 @@ export class RoomWebSocket {
         }
         if (data.type === 'me' && this.onMeChange) {
           this.onMeChange({ id: data.id, name: data.name });
+        }
+        if (data.type === 'language' && this.onLanguageChange && (data.language === 'javascript' || data.language === 'python')) {
+          this.onLanguageChange(data.language);
         }
       } catch (e) { void e; }
     };
@@ -100,6 +104,10 @@ export class RoomWebSocket {
     this.onMeChange = callback;
   }
 
+  onLanguage(callback: (language: 'javascript' | 'python') => void) {
+    this.onLanguageChange = callback;
+  }
+
   join(name: string) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type: 'join', name }));
@@ -121,6 +129,12 @@ export class RoomWebSocket {
   sendOutputUpdate(result: { output: string; error: string | null; executionTime: number }) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type: 'output_update', ...result }));
+    }
+  }
+
+  sendLanguageUpdate(language: 'javascript' | 'python') {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: 'language_update', language }));
     }
   }
 }

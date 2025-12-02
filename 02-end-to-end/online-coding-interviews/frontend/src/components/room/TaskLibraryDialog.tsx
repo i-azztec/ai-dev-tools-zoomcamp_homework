@@ -49,9 +49,9 @@ export default function TaskLibraryDialog({ currentLanguage, onSelectTask }: Tas
 
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'Легко';
-      case 'medium': return 'Средне';
-      case 'hard': return 'Сложно';
+      case 'easy': return 'Easy';
+      case 'medium': return 'Medium';
+      case 'hard': return 'Hard';
       default: return difficulty;
     }
   };
@@ -61,14 +61,14 @@ export default function TaskLibraryDialog({ currentLanguage, onSelectTask }: Tas
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Book className="w-4 h-4" />
-          Библиотека задач
+          Task Library
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Библиотека задач</DialogTitle>
+          <DialogTitle>Task Library</DialogTitle>
           <DialogDescription>
-            Выберите задачу для собеседования ({currentLanguage === 'javascript' ? 'JavaScript' : 'Python'})
+            Choose an interview task ({currentLanguage === 'javascript' ? 'JavaScript' : 'Python'})
           </DialogDescription>
         </DialogHeader>
 
@@ -77,7 +77,7 @@ export default function TaskLibraryDialog({ currentLanguage, onSelectTask }: Tas
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск задач..."
+            placeholder="Search tasks..."
             className="pl-9"
           />
         </div>
@@ -109,7 +109,7 @@ export default function TaskLibraryDialog({ currentLanguage, onSelectTask }: Tas
             
             {filteredTasks.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Задачи не найдены
+                No tasks found
               </div>
             )}
           </div>

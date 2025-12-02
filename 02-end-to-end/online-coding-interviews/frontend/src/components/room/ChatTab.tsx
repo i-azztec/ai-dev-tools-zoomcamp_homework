@@ -23,7 +23,7 @@ export default function ChatTab({ roomId, myName, onChat, sendChatMessage }: Cha
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [name, setName] = useState<string>(myName || localStorage.getItem('userName') || 'Гость');
+  const [name, setName] = useState<string>(myName || 'Guest');
 
   const sendMessage = () => {
     if (!inputText.trim()) return;
@@ -49,7 +49,6 @@ export default function ChatTab({ roomId, myName, onChat, sendChatMessage }: Cha
   }, [myName, name]);
 
   useEffect(() => {
-    // Автоскролл вниз при новых сообщениях
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
@@ -65,13 +64,13 @@ export default function ChatTab({ roomId, myName, onChat, sendChatMessage }: Cha
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border bg-card flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Имя:</span>
-        <Input value={name} readOnly className="w-48" placeholder="Ваше имя" />
+        <span className="text-sm text-muted-foreground">Name:</span>
+        <Input value={name} readOnly className="w-48" placeholder="Your name" />
       </div>
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground text-sm py-8">
-            Пока нет сообщений. Начните общение!
+            No messages yet. Start the conversation!
           </div>
         ) : (
           <div className="space-y-3">
@@ -80,7 +79,7 @@ export default function ChatTab({ roomId, myName, onChat, sendChatMessage }: Cha
                 <div className="flex items-baseline gap-2">
                   <span className="text-sm font-medium">{message.userName}</span>
                   <span className="text-xs text-muted-foreground">
-                    {message.timestamp.toLocaleTimeString('ru-RU', {
+                    {message.timestamp.toLocaleTimeString('en-US', {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
@@ -99,7 +98,7 @@ export default function ChatTab({ roomId, myName, onChat, sendChatMessage }: Cha
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="Написать сообщение..."
+            placeholder="Type a message..."
             className="flex-1"
           />
           <Button 

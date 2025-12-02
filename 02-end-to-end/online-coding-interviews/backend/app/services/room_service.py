@@ -5,8 +5,8 @@ guest_counters: dict[str, int] = {}
 
 def _template(language: Literal["javascript", "python"]) -> str:
     if language == "python":
-        return "# Напишите код здесь\ndef solution():\n    pass\n"
-    return "// Напишите код здесь\nfunction solution() {\n  // ваше решение\n}\n"
+        return "# Write your code here\ndef solution():\n    pass\n"
+    return "// Write your code here\nfunction solution() {\n  // your solution\n}\n"
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -28,6 +28,7 @@ def create_room(language: Literal["javascript", "python"] = "javascript") -> dic
     }
     rooms[rid] = r
     participants.setdefault(rid, [])
+    guest_counters[rid] = 1
     return r
 
 def get_room(room_id: str) -> dict | None:
@@ -62,8 +63,8 @@ def get_participants(room_id: str) -> list[dict]:
 def add_participant(room_id: str, name: str) -> dict:
     pid = _gen_id()
     # auto assign unique guest name if default
-    if not name or name.strip() == "Гость":
-        base = "Гость"
+    if not name or name.strip().lower() == "guest":
+        base = "Guest"
         n = guest_counters.get(room_id, 1)
         name = f"{base}{n}"
         guest_counters[room_id] = n + 1
