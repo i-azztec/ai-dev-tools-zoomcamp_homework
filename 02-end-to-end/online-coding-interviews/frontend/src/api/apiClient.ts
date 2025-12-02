@@ -24,89 +24,69 @@ export interface CodeExecutionResult {
   executionTime: number;
 }
 
-// === API функции (заглушки) ===
+// === API функции ===
 
 // Создать новую комнату
 export async function createRoom(): Promise<Room> {
-  // TODO: заменить на fetch(`${API_BASE_URL}/rooms`, { method: 'POST' })
-  await simulateDelay(300);
-  return {
-    id: generateRoomId(),
-    code: '// Напишите код здесь\n',
-    language: 'javascript',
-    task: '',
-    createdAt: new Date().toISOString()
-  };
+  const res = await fetch(`${API_BASE_URL}/rooms`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to create room');
+  return await res.json();
 }
 
 // Получить комнату по ID
 export async function getRoom(roomId: string): Promise<Room | null> {
-  // TODO: заменить на fetch(`${API_BASE_URL}/rooms/${roomId}`)
-  await simulateDelay(200);
-  
-  // Заглушка: возвращаем mock-данные
-  return {
-    id: roomId,
-    code: '// Напишите код здесь\nfunction solution() {\n  // ваше решение\n}\n',
-    language: 'javascript',
-    task: 'Напишите функцию, которая сортирует массив чисел по возрастанию.',
-    createdAt: new Date().toISOString()
-  };
+  const res = await fetch(`${API_BASE_URL}/rooms/${roomId}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('Failed to get room');
+  return await res.json();
 }
 
 // Обновить код в комнате
 export async function updateRoomCode(roomId: string, code: string): Promise<void> {
-  // TODO: заменить на WebSocket или fetch PUT
-  console.log('Mock: updating code for room', roomId);
-  await simulateDelay(50);
+  const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/code`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code })
+  });
+  if (!res.ok) throw new Error('Failed to update code');
 }
 
 // Обновить язык в комнате
 export async function updateRoomLanguage(roomId: string, language: string): Promise<void> {
-  // TODO: заменить на API вызов
-  console.log('Mock: updating language for room', roomId, language);
-  await simulateDelay(100);
+  const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/language`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ language })
+  });
+  if (!res.ok) throw new Error('Failed to update language');
 }
 
 // Обновить задачу в комнате
 export async function updateRoomTask(roomId: string, task: string): Promise<void> {
-  // TODO: заменить на API вызов
-  console.log('Mock: updating task for room', roomId);
-  await simulateDelay(50);
+  const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/task`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ task })
+  });
+  if (!res.ok) throw new Error('Failed to update task');
 }
 
 // Выполнить код
-export async function executeCode(code: string, language: string): Promise<CodeExecutionResult> {
-  // TODO: заменить на реальное выполнение через WASM или бэкенд
-  await simulateDelay(500);
-  
-  // Заглушка: имитируем успешное выполнение
-  if (code.includes('error') || code.includes('throw')) {
-    return {
-      output: '',
-      error: `${language === 'python' ? 'Python' : 'JavaScript'} Error: Пример ошибки выполнения`,
-      executionTime: 23
-    };
-  }
-  
-  return {
-    output: `[Mock Output]\nКод на ${language === 'python' ? 'Python' : 'JavaScript'} выполнен успешно\n\nРезультат: [1, 2, 3, 4, 5]`,
-    error: null,
-    executionTime: 42
-  };
+export async function executeCode(roomId: string, code: string, language: string): Promise<CodeExecutionResult> {
+  const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, language })
+  });
+  if (!res.ok) throw new Error('Failed to execute code');
+  return await res.json();
 }
 
 // Получить участников комнаты
 export async function getRoomParticipants(roomId: string): Promise<Participant[]> {
-  // TODO: заменить на WebSocket подписку
-  await simulateDelay(100);
-  
-  const userName = localStorage.getItem('userName') || 'Гость';
-  
-  return [
-    { id: '1', name: userName, isOnline: true },
-    // Можно добавить mock участников для демо
-  ];
+  const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/participants`);
+  if (!res.ok) throw new Error('Failed to get participants');
+  return await res.json();
 }
 
 // Вспомогательные функции
@@ -114,6 +94,13 @@ function generateRoomId(): string {
   return Math.random().toString(36).substring(2, 8);
 }
 
-function simulateDelay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+export async function pingBackend(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL.replace('/api', '')}/health`);
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data && data.status === 'ok';
+  } catch (e) {
+    return false;
+  }
 }

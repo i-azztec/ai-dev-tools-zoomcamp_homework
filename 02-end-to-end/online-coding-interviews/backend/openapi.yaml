@@ -1,0 +1,224 @@
+openapi: 3.0.3
+info:
+  title: CodeInterview API
+  description: API для платформы онлайн-собеседований по программированию
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001/api
+paths:
+  /rooms:
+    post:
+      summary: Создать новую комнату
+      operationId: createRoom
+      responses:
+        '201':
+          description: Комната создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+  /rooms/{roomId}:
+    get:
+      summary: Получить комнату по ID
+      operationId: getRoom
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Данные комнаты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Комната не найдена
+  /rooms/{roomId}/code:
+    put:
+      summary: Обновить код в комнате
+      operationId: updateRoomCode
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCodeRequest'
+      responses:
+        '200':
+          description: Код обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Комната не найдена
+  /rooms/{roomId}/task:
+    put:
+      summary: Обновить задачу в комнате
+      operationId: updateRoomTask
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Задача обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Комната не найдена
+  /rooms/{roomId}/language:
+    put:
+      summary: Обновить язык программирования
+      operationId: updateRoomLanguage
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLanguageRequest'
+      responses:
+        '200':
+          description: Язык обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Комната не найдена
+  /rooms/{roomId}/participants:
+    get:
+      summary: Получить список участников комнаты
+      operationId: getRoomParticipants
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список участников
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+        '404':
+          description: Комната не найдена
+  /rooms/{roomId}/execute:
+    post:
+      summary: Выполнить код
+      operationId: executeCode
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteCodeRequest'
+      responses:
+        '200':
+          description: Результат выполнения
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+components:
+  schemas:
+    Room:
+      type: object
+      required: [id, code, language, task, createdAt]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        language:
+          type: string
+          enum: [javascript, python]
+        task:
+          type: string
+        createdAt:
+          type: string
+    Participant:
+      type: object
+      required: [id, name, isOnline]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        isOnline:
+          type: boolean
+    CodeExecutionResult:
+      type: object
+      required: [output, error, executionTime]
+      properties:
+        output:
+          type: string
+        error:
+          type: string
+          nullable: true
+        executionTime:
+          type: integer
+    UpdateCodeRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+    UpdateTaskRequest:
+      type: object
+      required: [task]
+      properties:
+        task:
+          type: string
+    UpdateLanguageRequest:
+      type: object
+      required: [language]
+      properties:
+        language:
+          type: string
+          enum: [javascript, python]
+    ExecuteCodeRequest:
+      type: object
+      required: [code, language]
+      properties:
+        code:
+          type: string
+        language:
+          type: string
+          enum: [javascript, python]
+

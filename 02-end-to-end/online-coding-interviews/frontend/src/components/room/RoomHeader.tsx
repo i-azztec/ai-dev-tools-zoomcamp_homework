@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useTimer } from '@/hooks/useTimer';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import { useEffect } from 'react';
+import { pingBackend } from '@/api/apiClient';
 import type { Participant } from '@/api/apiClient';
 
 interface RoomHeaderProps {
@@ -14,6 +16,14 @@ interface RoomHeaderProps {
 export default function RoomHeader({ roomId, participants }: RoomHeaderProps) {
   const [copied, setCopied] = useState(false);
   const { formattedTime } = useTimer();
+  const [apiOnline, setApiOnline] = useState<boolean>(true);
+
+  useEffect(() => {
+    let mounted = true;
+    pingBackend().then(ok => { if (mounted) setApiOnline(ok); });
+    const id = setInterval(() => { pingBackend().then(ok => { if (mounted) setApiOnline(ok); }); }, 5000);
+    return () => { mounted = false; clearInterval(id); };
+  }, []);
 
   const copyRoomLink = async () => {
     const url = window.location.href;
@@ -44,6 +54,11 @@ export default function RoomHeader({ roomId, participants }: RoomHeaderProps) {
             <div className="flex items-center gap-1.5 text-muted-foreground font-mono">
               <span>⏱️</span>
               <span>{formattedTime}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <span className={`inline-block w-2 h-2 rounded-full ${apiOnline ? 'bg-green-500' : 'bg-red-500'}`}></span>
+              <span className="text-sm">API</span>
             </div>
           </div>
         </div>

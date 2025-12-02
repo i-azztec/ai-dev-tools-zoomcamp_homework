@@ -12,12 +12,11 @@ export default function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const [executionResult, setExecutionResult] = useState<CodeExecutionResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
-  
+  const rid = roomId || "";
+  const { room, participants, loading, error, updateCode, updateTask, updateLanguage, runCode } = useRoom(rid);
   if (!roomId) {
     return <Navigate to="/" replace />;
   }
-
-  const { room, participants, loading, error, updateCode, updateTask, updateLanguage, runCode } = useRoom(roomId);
 
   const handleRunCode = async () => {
     setIsRunning(true);

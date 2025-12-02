@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
-import { getRoom, updateRoomCode, updateRoomTask, executeCode, getRoomParticipants } from '@/api/apiClient';
+import { useState, useEffect, useCallback } from 'react';
+import { getRoom, updateRoomCode, updateRoomTask, updateRoomLanguage, executeCode, getRoomParticipants } from '@/api/apiClient';
+import { RoomWebSocket } from '@/api/websocket';
+import { useRef } from 'react';
 import type { Room, CodeExecutionResult, Participant } from '@/api/apiClient';
 
 export function useRoom(roomId: string) {
@@ -7,13 +9,13 @@ export function useRoom(roomId: string) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const wsRef = useRef<RoomWebSocket | null>(null);
 
-  useEffect(() => {
-    loadRoom();
-    loadParticipants();
-  }, [roomId]);
-
-  const loadRoom = async () => {
+  const loadRoom = useCallback(async () => {
+    if (!roomId) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const data = await getRoom(roomId);
@@ -29,16 +31,36 @@ export function useRoom(roomId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [roomId]);
 
-  const loadParticipants = async () => {
+  const loadParticipants = useCallback(async () => {
+    if (!roomId) return;
     try {
       const data = await getRoomParticipants(roomId);
       setParticipants(data);
     } catch (err) {
       console.error('Ошибка загрузки участников:', err);
     }
-  };
+  }, [roomId]);
+
+  useEffect(() => {
+    loadRoom();
+    loadParticipants();
+    if (!wsRef.current) {
+      wsRef.current = new RoomWebSocket(roomId);
+      wsRef.current.onCode((code) => {
+        setRoom((prev) => prev ? { ...prev, code } : prev);
+      });
+      wsRef.current.onTask((task) => {
+        setRoom((prev) => prev ? { ...prev, task } : prev);
+      });
+      wsRef.current.connect();
+    }
+    return () => {
+      wsRef.current?.disconnect();
+      wsRef.current = null;
+    };
+  }, [roomId, loadRoom, loadParticipants]);
 
   const updateCode = async (code: string) => {
     if (!room) return;
@@ -51,6 +73,7 @@ export function useRoom(roomId: string) {
     } catch (err) {
       console.error('Ошибка обновления кода:', err);
     }
+    wsRef.current?.sendCodeUpdate(code);
   };
 
   const updateTask = async (task: string) => {
@@ -64,6 +87,7 @@ export function useRoom(roomId: string) {
     } catch (err) {
       console.error('Ошибка обновления задачи:', err);
     }
+    wsRef.current?.sendTaskUpdate(task);
   };
 
   const updateLanguage = (language: 'javascript' | 'python') => {
@@ -80,6 +104,7 @@ export function useRoom(roomId: string) {
     }
     
     setRoom({ ...room, language, code: newCode });
+    updateRoomLanguage(roomId, language).catch(err => console.error('Ошибка обновления языка:', err));
   };
 
   const runCode = async (): Promise<CodeExecutionResult> => {
@@ -92,7 +117,7 @@ export function useRoom(roomId: string) {
     }
     
     try {
-      return await executeCode(room.code, room.language);
+      return await executeCode(room.id, room.code, room.language);
     } catch (err) {
       return {
         output: '',

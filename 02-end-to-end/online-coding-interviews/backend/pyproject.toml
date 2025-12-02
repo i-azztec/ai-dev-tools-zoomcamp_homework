@@ -1,0 +1,18 @@
+[project]
+name = "codeinterview-backend"
+version = "0.1.0"
+description = "FastAPI backend for Online Coding Interviews"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn>=0.30",
+  "pydantic>=2.7",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.uv]
+dev-dependencies = [
+  "pytest>=8.0",
+]
