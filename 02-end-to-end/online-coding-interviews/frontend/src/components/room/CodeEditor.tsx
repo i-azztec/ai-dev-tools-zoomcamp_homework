@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Editor from 'react-simple-code-editor';
 import Prism from 'prismjs';
+import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism-tomorrow.css';
@@ -18,12 +19,12 @@ export default function CodeEditor({ code, language, onChange }: CodeEditorProps
     setMounted(true);
   }, []);
 
-  const highlight = (code: string) => {
+  const highlight = (codeStr: string) => {
     try {
-      const grammar = language === 'python' ? Prism.languages.python : Prism.languages.javascript;
-      return Prism.highlight(code, grammar, language);
+      const grammar = Prism.languages[language] || Prism.languages.javascript;
+      return Prism.highlight(codeStr, grammar, language);
     } catch (e) {
-      return code;
+      return codeStr;
     }
   };
 
@@ -42,7 +43,7 @@ export default function CodeEditor({ code, language, onChange }: CodeEditorProps
         onValueChange={onChange}
         highlight={highlight}
         padding={16}
-        className="code-editor min-h-full focus:outline-none"
+        className={`code-editor min-h-full focus:outline-none language-${language}`}
         style={{
           fontFamily: "'Fira Code', 'JetBrains Mono', 'Consolas', monospace",
           fontSize: 14,

@@ -3,6 +3,7 @@ import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { Participant } from '@/api/apiClient';
 
 interface Message {
   id: string;
@@ -13,31 +14,39 @@ interface Message {
 
 interface ChatTabProps {
   roomId: string;
+  myName?: string;
+  onChat?: (cb: (message: { userName: string; text: string; timestamp: string }) => void) => void;
+  sendChatMessage?: (text: string) => void;
 }
 
-export default function ChatTab({ roomId }: ChatTabProps) {
+export default function ChatTab({ roomId, myName, onChat, sendChatMessage }: ChatTabProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const userName = localStorage.getItem('userName') || 'Гость';
+  const [name, setName] = useState<string>(myName || localStorage.getItem('userName') || 'Гость');
 
-  // Mock: В реальности это будет через WebSocket
   const sendMessage = () => {
     if (!inputText.trim()) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      userName,
-      text: inputText,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, newMessage]);
+    const text = inputText;
     setInputText('');
-    
-    // TODO: отправить через WebSocket
-    console.log('Mock: sending message to room', roomId, newMessage);
+    sendChatMessage?.(text);
   };
+
+  useEffect(() => {
+    if (onChat) {
+      onChat((m) => {
+        setMessages(prev => [...prev, { id: Date.now().toString(), userName: m.userName, text: m.text, timestamp: new Date(m.timestamp) }]);
+      });
+    }
+  }, [onChat]);
+
+  useEffect(() => {
+    if (myName && myName !== name) {
+      setName(myName);
+      localStorage.setItem('userName', myName);
+    }
+  }, [myName, name]);
 
   useEffect(() => {
     // Автоскролл вниз при новых сообщениях
@@ -55,6 +64,10 @@ export default function ChatTab({ roomId }: ChatTabProps) {
 
   return (
     <div className="flex flex-col h-full">
+      <div className="p-4 border-b border-border bg-card flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">Имя:</span>
+        <Input value={name} readOnly className="w-48" placeholder="Ваше имя" />
+      </div>
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground text-sm py-8">

@@ -7,12 +7,16 @@ import type { CodeExecutionResult } from '@/api/apiClient';
 interface RightPanelProps {
   roomId: string;
   task: string;
-  onTaskChange: (task: string) => void;
+  taskTitle?: string;
+  onTaskChange: (task: string, title?: string) => void;
   executionResult: CodeExecutionResult | null;
   isRunning: boolean;
+  myName?: string;
+  onChat?: (cb: (message: { userName: string; text: string; timestamp: string }) => void) => void;
+  sendChatMessage?: (text: string) => void;
 }
 
-export default function RightPanel({ roomId, task, onTaskChange, executionResult, isRunning }: RightPanelProps) {
+export default function RightPanel({ roomId, task, taskTitle, onTaskChange, executionResult, isRunning, myName, onChat, sendChatMessage }: RightPanelProps) {
   return (
     <div className="h-full border-l border-border bg-card">
       <Tabs defaultValue="task" className="h-full flex flex-col">
@@ -28,16 +32,16 @@ export default function RightPanel({ roomId, task, onTaskChange, executionResult
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="task" className="flex-1 m-0 overflow-auto">
-          <TaskTab task={task} onTaskChange={onTaskChange} />
+        <TabsContent value="task" className="flex-1 m-0 overflow-auto" forceMount>
+          <TaskTab task={task} title={taskTitle} onTaskChange={onTaskChange} />
         </TabsContent>
         
-        <TabsContent value="output" className="flex-1 m-0 overflow-auto">
+        <TabsContent value="output" className="flex-1 m-0 overflow-auto" forceMount>
           <OutputTab result={executionResult} isRunning={isRunning} />
         </TabsContent>
 
-        <TabsContent value="chat" className="flex-1 m-0 overflow-hidden">
-          <ChatTab roomId={roomId} />
+        <TabsContent value="chat" className="flex-1 m-0 overflow-hidden" forceMount>
+          <ChatTab roomId={roomId} myName={myName} onChat={onChat} sendChatMessage={sendChatMessage} />
         </TabsContent>
       </Tabs>
     </div>

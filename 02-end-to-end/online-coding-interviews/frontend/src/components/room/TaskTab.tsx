@@ -4,20 +4,31 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface TaskTabProps {
   task: string;
-  onTaskChange: (task: string) => void;
+  title?: string;
+  onTaskChange: (task: string, title?: string) => void;
 }
 
-export default function TaskTab({ task, onTaskChange }: TaskTabProps) {
+export default function TaskTab({ task, title: initialTitle, onTaskChange }: TaskTabProps) {
   const [localTask, setLocalTask] = useState(task);
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialTitle || '');
 
   useEffect(() => {
     setLocalTask(task);
   }, [task]);
 
+  useEffect(() => {
+    setTitle(initialTitle || '');
+  }, [initialTitle]);
+
   const handleTaskBlur = () => {
-    if (localTask !== task) {
-      onTaskChange(localTask);
+    if (localTask !== task || title !== (initialTitle || '')) {
+      onTaskChange(localTask, title);
+    }
+  };
+
+  const handleTitleBlur = () => {
+    if (title !== (initialTitle || '')) {
+      onTaskChange(localTask, title);
     }
   };
 
@@ -30,6 +41,7 @@ export default function TaskTab({ task, onTaskChange }: TaskTabProps) {
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onBlur={handleTitleBlur}
           placeholder="Например: Сортировка массива"
           className="bg-background"
         />

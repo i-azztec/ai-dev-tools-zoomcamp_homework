@@ -9,6 +9,7 @@ from ..services.room_service import (
     update_language,
     get_participants,
 )
+from ..services.exec_service import execute_code
 
 router = APIRouter()
 
@@ -20,6 +21,7 @@ class UpdateCodeRequest(BaseModel):
 
 class UpdateTaskRequest(BaseModel):
     task: str
+    title: str | None = None
 
 class UpdateLanguageRequest(BaseModel):
     language: Literal["javascript", "python"]
@@ -33,6 +35,7 @@ class Room(BaseModel):
     code: str
     language: Literal["javascript", "python"]
     task: str
+    taskTitle: str | None = None
     createdAt: str
 
 class Participant(BaseModel):
@@ -66,10 +69,25 @@ def api_update_code(room_id: str, body: UpdateCodeRequest):
 
 @router.put("/rooms/{room_id}/task", response_model=Room)
 def api_update_task(room_id: str, body: UpdateTaskRequest):
-    r = update_task(room_id, body.task)
+    r = update_task(room_id, body.task, body.title)
     if r is None:
         raise HTTPException(status_code=404, detail="Not Found")
     return r
+
+@router.get("/", include_in_schema=False)
+def api_root():
+    return {
+        "status": "ok",
+        "endpoints": [
+            "/rooms",
+            "/rooms/{roomId}",
+            "/rooms/{roomId}/code",
+            "/rooms/{roomId}/task",
+            "/rooms/{roomId}/language",
+            "/rooms/{roomId}/participants",
+            "/rooms/{roomId}/execute",
+        ],
+    }
 
 @router.put("/rooms/{room_id}/language", response_model=Room)
 def api_update_language(room_id: str, body: UpdateLanguageRequest):
@@ -84,9 +102,4 @@ def api_get_participants(room_id: str):
 
 @router.post("/rooms/{room_id}/execute", response_model=CodeExecutionResult)
 def api_execute(room_id: str, body: ExecuteCodeRequest):
-    return {
-        "output": f"[Mock Output] Код на {body.language} выполнен",
-        "error": None,
-        "executionTime": 42,
-    }
-
+    return execute_code(body.code, body.language)

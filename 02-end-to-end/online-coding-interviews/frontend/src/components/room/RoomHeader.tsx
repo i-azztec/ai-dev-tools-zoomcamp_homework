@@ -27,9 +27,24 @@ export default function RoomHeader({ roomId, participants }: RoomHeaderProps) {
 
   const copyRoomLink = async () => {
     const url = window.location.href;
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      try {
+        const temp = document.createElement('textarea');
+        temp.value = url;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (e) {
+        console.error('Ошибка копирования ссылки:', e);
+      }
+    }
   };
 
   return (

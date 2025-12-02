@@ -9,6 +9,7 @@ export interface Room {
   code: string;
   language: 'javascript' | 'python';
   task: string;
+  taskTitle?: string;
   createdAt: string;
 }
 
@@ -71,6 +72,16 @@ export async function updateRoomTask(roomId: string, task: string): Promise<void
   if (!res.ok) throw new Error('Failed to update task');
 }
 
+export async function updateRoomTaskWithTitle(roomId: string, title: string | undefined, task: string): Promise<Room> {
+  const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/task`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ task, title })
+  });
+  if (!res.ok) throw new Error('Failed to update task');
+  return await res.json();
+}
+
 // Выполнить код
 export async function executeCode(roomId: string, code: string, language: string): Promise<CodeExecutionResult> {
   const res = await fetch(`${API_BASE_URL}/rooms/${roomId}/execute`, {
@@ -96,7 +107,8 @@ function generateRoomId(): string {
 
 export async function pingBackend(): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE_URL.replace('/api', '')}/health`);
+    const base = API_BASE_URL.endsWith('/api') ? API_BASE_URL.slice(0, -4) : API_BASE_URL;
+    const res = await fetch(`${base}/health`);
     if (!res.ok) return false;
     const data = await res.json();
     return data && data.status === 'ok';

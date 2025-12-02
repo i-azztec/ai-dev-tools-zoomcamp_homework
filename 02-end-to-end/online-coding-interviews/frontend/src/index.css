@@ -42,11 +42,11 @@ All colors MUST be HSL.
 
     --radius: 0.375rem;
 
-    /* Editor specific */
-    --editor-background: 0 0% 12%;
-    --editor-foreground: 0 0% 83%;
-    --editor-line-number: 0 0% 50%;
-    --panel-background: 0 0% 15%;
+    /* Editor specific (Light theme) */
+    --editor-background: 0 0% 98%;
+    --editor-foreground: 0 0% 12%;
+    --editor-line-number: 0 0% 40%;
+    --panel-background: 0 0% 95%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;

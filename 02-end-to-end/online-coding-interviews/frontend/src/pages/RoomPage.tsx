@@ -1,5 +1,5 @@
 import { useParams, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import RoomHeader from '@/components/room/RoomHeader';
 import Toolbar from '@/components/room/Toolbar';
 import CodeEditor from '@/components/room/CodeEditor';
@@ -7,16 +7,15 @@ import RightPanel from '@/components/room/RightPanel';
 import { useRoom } from '@/hooks/useRoom';
 import type { CodeExecutionResult } from '@/api/apiClient';
 import type { TaskTemplate } from '@/data/taskLibrary';
+import { taskLibrary } from '@/data/taskLibrary';
 
 export default function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const [executionResult, setExecutionResult] = useState<CodeExecutionResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [initApplied, setInitApplied] = useState(false);
   const rid = roomId || "";
-  const { room, participants, loading, error, updateCode, updateTask, updateLanguage, runCode } = useRoom(rid);
-  if (!roomId) {
-    return <Navigate to="/" replace />;
-  }
+  const { room, participants, output, myName, loading, error, updateCode, updateTask, updateLanguage, runCode, onChat, sendChatMessage } = useRoom(rid);
 
   const handleRunCode = async () => {
     setIsRunning(true);
@@ -25,13 +24,24 @@ export default function RoomPage() {
     setIsRunning(false);
   };
 
-  const handleLoadTask = (task: TaskTemplate) => {
-    updateTask(task.description);
+  const handleLoadTask = useCallback((task: TaskTemplate) => {
+    updateTask(task.description, task.title);
     updateCode(task.starterCode);
     if (task.language !== room?.language) {
       updateLanguage(task.language);
     }
-  };
+  }, [room?.language, updateTask, updateCode, updateLanguage]);
+
+  // Инициализация начальной задачи из библиотеки, если пусто
+  useEffect(() => {
+    if (!initApplied && room && !room.task?.trim() && !room.taskTitle?.trim()) {
+      const initial = taskLibrary.find(t => t.language === room.language);
+      if (initial) {
+        handleLoadTask(initial);
+        setInitApplied(true);
+      }
+    }
+  }, [initApplied, room, handleLoadTask]);
 
   if (loading) {
     return (
@@ -88,9 +98,13 @@ export default function RoomPage() {
           <RightPanel
             roomId={roomId}
             task={room.task}
+            taskTitle={room.taskTitle}
             onTaskChange={updateTask}
-            executionResult={executionResult}
+            executionResult={output ?? executionResult}
             isRunning={isRunning}
+            myName={myName}
+            onChat={onChat}
+            sendChatMessage={sendChatMessage}
           />
         </div>
       </div>

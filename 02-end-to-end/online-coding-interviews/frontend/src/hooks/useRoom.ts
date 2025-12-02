@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getRoom, updateRoomCode, updateRoomTask, updateRoomLanguage, executeCode, getRoomParticipants } from '@/api/apiClient';
+import { getRoom, updateRoomCode, updateRoomTask, updateRoomTaskWithTitle, updateRoomLanguage, executeCode, getRoomParticipants } from '@/api/apiClient';
 import { RoomWebSocket } from '@/api/websocket';
 import { useRef } from 'react';
 import type { Room, CodeExecutionResult, Participant } from '@/api/apiClient';
@@ -10,6 +10,8 @@ export function useRoom(roomId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<RoomWebSocket | null>(null);
+  const [myName, setMyName] = useState<string>(localStorage.getItem('userName') || 'Гость');
+  const [output, setOutput] = useState<CodeExecutionResult | null>(null);
 
   const loadRoom = useCallback(async () => {
     if (!roomId) {
@@ -54,7 +56,22 @@ export function useRoom(roomId: string) {
       wsRef.current.onTask((task) => {
         setRoom((prev) => prev ? { ...prev, task } : prev);
       });
+      wsRef.current.onTaskTitle((title) => {
+        setRoom((prev) => prev ? { ...prev, taskTitle: title } : prev);
+      });
+      wsRef.current.onParticipants((list) => {
+        setParticipants(list);
+      });
+      wsRef.current.onOutput((res) => {
+        setOutput({ output: res.output, error: res.error, executionTime: res.executionTime });
+      });
+      wsRef.current.onMe((me) => {
+        setMyName(me.name);
+        localStorage.setItem('userName', me.name);
+      });
       wsRef.current.connect();
+      const userName = localStorage.getItem('userName') || 'Гость';
+      wsRef.current.join(userName);
     }
     return () => {
       wsRef.current?.disconnect();
@@ -64,9 +81,8 @@ export function useRoom(roomId: string) {
 
   const updateCode = async (code: string) => {
     if (!room) return;
-    
-    // Оптимистичное обновление
-    setRoom({ ...room, code });
+    // Оптимистичное обновление (используем функциональный сеттер)
+    setRoom(prev => prev ? { ...prev, code } : prev);
     
     try {
       await updateRoomCode(roomId, code);
@@ -76,34 +92,44 @@ export function useRoom(roomId: string) {
     wsRef.current?.sendCodeUpdate(code);
   };
 
-  const updateTask = async (task: string) => {
+  const onChat = (cb: (message: { userName: string; text: string; timestamp: string }) => void) => {
+    wsRef.current?.onChat(cb);
+  };
+
+  const sendChatMessage = (text: string) => {
+    wsRef.current?.sendChatMessage(text, myName);
+  };
+
+  const updateTask = async (task: string, title?: string) => {
     if (!room) return;
-    
-    // Оптимистичное обновление
-    setRoom({ ...room, task });
+    // Оптимистичное обновление (используем функциональный сеттер)
+    setRoom(prev => prev ? { ...prev, task, taskTitle: typeof title !== 'undefined' ? title : prev.taskTitle } : prev);
     
     try {
-      await updateRoomTask(roomId, task);
+      if (typeof title !== 'undefined') {
+        await updateRoomTaskWithTitle(roomId, title, task);
+      } else {
+        await updateRoomTask(roomId, task);
+      }
     } catch (err) {
       console.error('Ошибка обновления задачи:', err);
     }
-    wsRef.current?.sendTaskUpdate(task);
+    wsRef.current?.sendTaskUpdate(task, title);
   };
 
   const updateLanguage = (language: 'javascript' | 'python') => {
     if (!room) return;
-    
     // При смене языка добавляем шаблон кода, если редактор пуст или содержит стандартный текст
-    let newCode = room.code;
-    const isEmptyOrDefault = !room.code.trim() || room.code.trim() === '// Напишите код здесь';
-    
-    if (isEmptyOrDefault) {
-      newCode = language === 'javascript' 
-        ? '// Напишите код здесь\nfunction solution() {\n  // ваше решение\n}\n'
-        : '# Напишите код здесь\ndef solution():\n    pass\n';
-    }
-    
-    setRoom({ ...room, language, code: newCode });
+    setRoom(prev => {
+      if (!prev) return prev;
+      const isEmptyOrDefault = !prev.code.trim() || prev.code.trim() === '// Напишите код здесь';
+      const newCode = isEmptyOrDefault
+        ? (language === 'javascript'
+            ? '// Напишите код здесь\nfunction solution() {\n  // ваше решение\n}\n'
+            : '# Напишите код здесь\ndef solution():\n    pass\n')
+        : prev.code;
+      return { ...prev, language, code: newCode };
+    });
     updateRoomLanguage(roomId, language).catch(err => console.error('Ошибка обновления языка:', err));
   };
 
@@ -117,7 +143,10 @@ export function useRoom(roomId: string) {
     }
     
     try {
-      return await executeCode(room.id, room.code, room.language);
+      const res = await executeCode(room.id, room.code, room.language);
+      setOutput(res);
+      wsRef.current?.sendOutputUpdate(res);
+      return res;
     } catch (err) {
       return {
         output: '',
@@ -130,11 +159,15 @@ export function useRoom(roomId: string) {
   return {
     room,
     participants,
+    output,
+    myName,
     loading,
     error,
     updateCode,
     updateTask,
     updateLanguage,
-    runCode
+    runCode,
+    onChat,
+    sendChatMessage,
   };
 }
