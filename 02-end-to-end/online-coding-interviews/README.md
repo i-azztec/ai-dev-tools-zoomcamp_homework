@@ -187,7 +187,7 @@ Full OpenAPI specification is available in `backend/openapi.yaml`.
 
 ## Deployment
 
-The project is configured for deployment on **Render** using a single container approach.
+The project is configured for deployment on [**Render: Cloud Application Platform**](https://render.com/) using a single container approach.
 - **Configuration**: `render.yaml`
 - **Dockerfile**: Multi-stage build that compiles the frontend and serves it via FastAPI static mounting.
 
@@ -201,3 +201,9 @@ Automated pipeline configured via GitHub Actions (`.github/workflows/ci.yml`):
 
 - **Swagger UI**: http://localhost:3001/api/docs
 - **ReDoc**: http://localhost:3001/api/redoc
+
+## Acknowledgements
+
+Thanks to [DataTalks.Club](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp) for open-source learning framework
+
+
