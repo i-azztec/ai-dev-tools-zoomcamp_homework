@@ -1,19 +1,39 @@
 # Online Coding Interviews
 
-Platform for real-time technical interviews with collaborative coding, task library, and secure browser-based code execution.
+**CodeInterview** is a full-featured platform for conducting real-time technical interviews. The application allows the interviewer and candidate to write code collaboratively, execute it directly in the browser, and communicate via chat.
 
-## Key Features
+The project implements a modern approach to online interviews, combining a code editor (IDE), a task library, and an execution environment into a single unified interface.
 
-- **Real-time Collaboration**: Multiple users can edit code simultaneously with instant updates (WebSocket).
-- **Shareable Rooms**: Create a unique link (`/room/:roomId`) and share it with candidates.
-- **Multi-language Support**: Syntax highlighting and execution for **JavaScript** and **Python**.
-- **Secure Code Execution**: 
-  - Code is executed entirely in the browser (Client-side).
-  - **JavaScript**: Runs in a sandboxed Web Worker.
-  - **Python**: Runs via **Pyodide** (WASM), ensuring security without server-side risks.
-- **Task Library**: Built-in library of interview questions (Algorithms, Arrays, Strings) for both languages.
-- **Smart Language Switching**: Switching languages preserves the context of the current task (e.g., switches from JS "Sort Array" to Python "Sort Array").
-- **Rich UI**: Chat, Participant list, Dark/Light mode, Execution Output panel.
+## Functionality Overview
+
+### 1. Rooms & Collaboration
+- **Instant Room Creation**: Any user can create a new room with a single click and get a unique link (`/room/:id`) to invite a candidate.
+- **Real-Time Synchronization**: All code changes, language switching, and task selection are instantly reflected for all room participants (via WebSocket).
+- **Participant List**: Real-time display of online users ("Guest", "Interviewer", etc.).
+- **Built-in Chat**: Text chat for communication within the room without switching to external messengers.
+
+### 2. Code Editor
+- **Syntax Highlighting**: Full syntax highlighting for **JavaScript** and **Python** (powered by PrismJS).
+- **Smart Editor**: Supports indentation, line numbering, and basic bracket auto-completion.
+- **On-the-fly Language Switching**: Switching from JS to Python (and vice versa) preserves the context of the current task — the appropriate code template for the selected language is automatically loaded.
+
+### 3. Secure Code Execution (Client-Side)
+A key feature of the platform is that code runs **on the client (in the browser)**, reducing server load and ensuring security.
+- **JavaScript**: Executes in an isolated **Web Worker**. `console.log` and errors are intercepted, preventing the main interface from freezing.
+- **Python**: Executes via **Pyodide** (WebAssembly). This is a full-fledged Python interpreter inside the browser. We intercept `stdout` (print) and `stderr`, returning the result to the output console.
+
+### 4. Task Library
+- **Built-in Tasks**: A ready-to-use set of algorithmic tasks (Arrays, Strings, Algorithms) of varying difficulty (Easy, Medium, Hard).
+- **Integration**: Selecting a task from the library automatically loads the problem description and starter code template into the editor.
+- **Bilingual Support**: Each task has a version for both JS and Python.
+
+### 5. Interface & UX
+- **Dark & Light Theme**: Support for theme switching.
+- **Responsive Design**: The interface works correctly on various screen resolutions.
+- **Error Handling**: 404 page for invalid links, Toast notifications for events.
+
+---
+
 
 
 ## Screenshots
@@ -187,9 +207,31 @@ Full OpenAPI specification is available in `backend/openapi.yaml`.
 
 ## Deployment
 
-The project is configured for deployment on [**Render: Cloud Application Platform**](https://render.com/) using a single container approach.
-- **Configuration**: `render.yaml`
-- **Dockerfile**: Multi-stage build that compiles the frontend and serves it via FastAPI static mounting.
+### Deploy to Render (Cloud Application Platform)
+
+This project is configured for seamless deployment on [**Render: Cloud Application Platform**](https://render.com).
+
+1.  Fork or push this repository to your GitHub account.
+2.  Create a new **Web Service** on Render.
+3.  Connect your GitHub repository.
+4.  Select **Docker** as the Runtime.
+5.  (Optional) Use the `render.yaml` Blueprint:
+    - Go to **Blueprints** in Render dashboard.
+    - Click **New Blueprint Instance**.
+    - Connect your repo — Render will automatically detect `render.yaml` and configure the service (Docker build, env vars, free plan).
+
+**Manual Configuration (if not using Blueprint):**
+- **Runtime**: Docker
+- **Build Command**: (Automatic from Dockerfile)
+- **Start Command**: (Automatic from Dockerfile)
+- **Environment Variables**:
+    - `FRONTEND_DIST_DIR`: `/app/frontend-dist` (Required for serving frontend static files)
+
+The `Dockerfile` handles the multi-stage build:
+1.  Compiles the React frontend (`npm run build`).
+2.  Installs Python backend dependencies.
+3.  Copies the built frontend to `/app/frontend-dist`.
+4.  Starts `uvicorn` which serves both API (`/api`) and Frontend (`/`).
 
 ## CI/CD
 
