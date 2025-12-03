@@ -15,6 +15,40 @@ Platform for real-time technical interviews with collaborative coding, task libr
 - **Smart Language Switching**: Switching languages preserves the context of the current task (e.g., switches from JS "Sort Array" to Python "Sort Array").
 - **Rich UI**: Chat, Participant list, Dark/Light mode, Execution Output panel.
 
+
+## Screenshots
+
+### Frontend UI
+
+<a href="docs/imgs/CodeInterview_Home.png" target="_blank">
+  <img src="docs/imgs/CodeInterview_Home.png" alt="Home Page" width="400"/>
+</a>
+
+<a href="docs/imgs/CodeInterview_Two-Users.png" target="_blank">
+  <img src="docs/imgs/CodeInterview_Two-Users.png" alt="Collaborative Room" width="400"/>
+</a>
+
+<a href="docs/imgs/CodeInterview_Task-Library.png" target="_blank">
+  <img src="docs/imgs/CodeInterview_Task-Library.png" alt="Task Library" width="400"/>
+</a>
+
+<a href="docs/imgs/CodeInterview_404.png" target="_blank">
+  <img src="docs/imgs/CodeInterview_404.png" alt="404 Page" width="400"/>
+</a>
+
+### Backend API (Swagger UI)
+
+<a href="docs/imgs/CodeInterview-API_Swagger-UI_1.png" target="_blank">
+  <img src="docs/imgs/CodeInterview-API_Swagger-UI_1.png" alt="Swagger UI Overview" width="400"/>
+</a>
+
+<a href="docs/imgs/CodeInterview-API_Swagger-UI_2.png" target="_blank">
+  <img src="docs/imgs/CodeInterview-API_Swagger-UI_2.png" alt="Swagger UI Endpoints" width="400"/>
+</a>
+<a href="docs/imgs/CodeInterview-API_Swagger-UI_3.png" target="_blank">
+  <img src="docs/imgs/CodeInterview-API_Swagger-UI_3.png" alt="Swagger UI Schemas" width="400"/>
+</a>
+
 ## Technology Stack
 
 ### Frontend
