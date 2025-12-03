@@ -4,6 +4,10 @@ from .api.routes import router as api_router
 from .services.room_service import update_code, update_task, add_participant, remove_participant, get_participants, update_language
 import json
 from datetime import datetime, timezone
+import os
+from fastapi.staticfiles import StaticFiles
+from .models.database import Base
+from .db.session import init_db, engine
 
 app = FastAPI(
     title="CodeInterview API",
@@ -23,6 +27,11 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api")
+
+try:
+    init_db(Base)
+except Exception:
+    pass
 
 rooms_ws: dict[str, set[WebSocket]] = {}
 ws_participant_map: dict[WebSocket, tuple[str, str, str]] = {}
@@ -146,3 +155,7 @@ async def room_ws(websocket: WebSocket, room_id: str):
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+front_dir = os.environ.get("FRONTEND_DIST_DIR")
+if front_dir and os.path.isdir(front_dir):
+    app.mount("/", StaticFiles(directory=front_dir, html=True), name="frontend")

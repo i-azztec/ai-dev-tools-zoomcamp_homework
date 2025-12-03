@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getRoom, updateRoomCode, updateRoomTask, updateRoomTaskWithTitle, updateRoomLanguage, executeCode, getRoomParticipants } from '@/api/apiClient';
+import { getRoom, updateRoomCode, updateRoomTask, updateRoomTaskWithTitle, updateRoomLanguage, getRoomParticipants } from '@/api/apiClient';
+import { runCodeInBrowser } from '@/utils/executor';
 import { RoomWebSocket } from '@/api/websocket';
+import { taskLibrary } from '@/data/taskLibrary';
 import { useRef } from 'react';
 import type { Room, CodeExecutionResult, Participant } from '@/api/apiClient';
 
@@ -121,19 +123,26 @@ export function useRoom(roomId: string) {
 
   const updateLanguage = (language: 'javascript' | 'python') => {
     if (!room) return;
-    // When changing language, insert code template if editor is empty or contains default text
-    setRoom(prev => {
-      if (!prev) return prev;
-      const isEmptyOrDefault = !prev.code.trim() || prev.code.trim() === '// Write code here';
-      const newCode = isEmptyOrDefault
-        ? (language === 'javascript'
-            ? '// Write code here\nfunction solution() {\n  // your solution\n}\n'
-            : '# Write code here\ndef solution():\n    pass\n')
-        : prev.code;
-      return { ...prev, language, code: newCode };
-    });
-    updateRoomLanguage(roomId, language).catch(err => console.error('Failed to update language:', err));
+    const template = (room.taskTitle?.trim()
+      ? taskLibrary.find(t => t.language === language && t.title === room.taskTitle)
+      : null) ?? taskLibrary.find(t => t.language === language) ?? null;
+    const newCode = template?.starterCode ?? (language === 'javascript'
+      ? '// Write code here\nfunction solution() {\n  // your solution\n}\n'
+      : '# Write code here\ndef solution():\n    pass\n');
+    const newTaskTitle = template?.title ?? '';
+    const newTaskDesc = template?.description ?? '';
+
+    setRoom(prev => prev ? { ...prev, language, code: newCode, taskTitle: newTaskTitle, task: newTaskDesc } : prev);
+
+    Promise.all([
+      updateRoomLanguage(roomId, language),
+      updateRoomCode(roomId, newCode),
+      updateRoomTaskWithTitle(roomId, newTaskTitle, newTaskDesc),
+    ]).catch(err => console.error('Failed to update language/task/code:', err));
+
     wsRef.current?.sendLanguageUpdate(language);
+    wsRef.current?.sendCodeUpdate(newCode);
+    wsRef.current?.sendTaskUpdate(newTaskDesc, newTaskTitle);
   };
 
   const runCode = async (): Promise<CodeExecutionResult> => {
@@ -146,7 +155,7 @@ export function useRoom(roomId: string) {
     }
     
     try {
-      const res = await executeCode(room.id, room.code, room.language);
+      const res = await runCodeInBrowser(room.code, room.language);
       setOutput(res);
       wsRef.current?.sendOutputUpdate(res);
       return res;

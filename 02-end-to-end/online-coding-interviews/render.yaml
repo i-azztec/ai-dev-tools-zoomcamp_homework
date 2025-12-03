@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: codeinterview
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: FRONTEND_DIST_DIR
+        value: /app/frontend-dist
+    healthCheckPath: /health

@@ -12,3 +12,4 @@ def test_execute_code_mock():
     assert "output" in data
     assert data["error"] is None
     assert isinstance(data["executionTime"], int)
+    assert data["output"].lower().startswith("execution is handled in the browser")

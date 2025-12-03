@@ -81,10 +81,12 @@ export default function HomePage() {
 
           <div className="space-y-4">
             <div className="text-left">
-              <label className="text-sm text-muted-foreground mb-2 block">
+              <label htmlFor="userName" className="text-sm text-muted-foreground mb-2 block">
                 Your name (optional):
               </label>
               <Input
+                id="userName"
+                name="userName"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 placeholder="Enter your name"
@@ -111,7 +113,12 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-3">
+              <label htmlFor="roomCode" className="text-sm text-muted-foreground mb-2 block">
+                Room code:
+              </label>
               <Input
+                id="roomCode"
+                name="roomCode"
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value)}
                 placeholder="Enter room code"
